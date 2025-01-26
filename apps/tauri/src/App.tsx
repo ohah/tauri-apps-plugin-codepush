@@ -1,42 +1,42 @@
 import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from `@tauri-apps/api/core`;
 import "./App.css";
 
-import { ping } from '@tauri-apps/plugin-codepush'
+import { ping } from `@tauri-apps/plugin-codepush`;
 
 
 
 function App() {
+  const abcd = 'asdf';
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [response, setResponse] = useState("");
 
-  function updateResponse(returnValue:any) {
+  function updateResponse(returnValue: any) {
     setResponse((prev) => {
       return prev + `${new Date().toLocaleTimeString()} ` + (typeof returnValue === 'string' ? returnValue : JSON.stringify(returnValue)) + `</br>`;
     });
   }
-  
+
   function _ping() {
     ping("Pong!").then(updateResponse).catch(updateResponse)
   }
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
     setGreetMsg(await invoke("greet", { name }));
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     _ping()
   }, [])
 
   return (
     <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+      <h1>Welcome to Tauri + React 안녕하세요.</h1>
 
-      <button onClick={()=>{_ping()}}> asdf </button>
-      <div dangerouslySetInnerHTML={{__html: response}} />
+      <button onClick={() => { _ping() }}> asdf </button>
+      <div dangerouslySetInnerHTML={{ __html: response }} />
 
       <div className="row">
         <a href="https://vitejs.dev" target="_blank">

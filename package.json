@@ -1,17 +1,15 @@
 {
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "tauri": "turbo run tauri",
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "tauri": "turbo tauri",
     "tauri:app": "cd apps && cd tauri && pnpm run tauri",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.4"
   },
   "packageManager": "pnpm@8.15.6",
   "name": "with-rollup"

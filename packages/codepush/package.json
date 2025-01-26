@@ -27,6 +27,8 @@
     "@tauri-apps/api": "^2.2.0"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@rollup/plugin-typescript": "^11.1.6",
     "rollup": "^4.9.6",
     "typescript": "~5.7.3",
