@@ -25,3 +25,4 @@ tauri-plugin-opener = "2"
 serde = { workspace = true }
 serde_json = { workspace = true }
 tauri-plugin-codepush = { path = "../../../packages/codepush" }
+hyper-rustls = "0.26.0"

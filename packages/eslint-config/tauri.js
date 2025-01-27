@@ -14,8 +14,8 @@ import { config as baseConfig } from './base.js';
 export const tauriJsConfig = [
   ...baseConfig,
   js.configs.recommended,
-  eslintConfigPrettier,
   ...tseslint.configs.recommended,
+  eslintConfigPrettier,
   {
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
