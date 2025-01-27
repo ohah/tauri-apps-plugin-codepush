@@ -5,12 +5,23 @@
     "esbenp.prettier-vscode",
     "tamasfe.even-better-toml"
   ],
-  // "editor.codeActionsOnSave": { "source.fixAll.eslint": true },
   "editor.formatOnSave": true,
-  // "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ]
+    "apps/tauri",
+    "apps/web",
+    "packages/codepush",
+    "packages/ui"
+  ],
+  "eslint.enable": true,
+  "eslint.run": "onSave",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }
