@@ -1,6 +1,6 @@
 use tauri::{
-  plugin::{Builder, TauriPlugin},
-  Manager, Runtime,
+    plugin::{Builder, TauriPlugin},
+    Manager, Runtime,
 };
 
 pub use models::*;
@@ -23,26 +23,27 @@ use mobile::Codepush;
 
 /// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the codepush APIs.
 pub trait CodepushExt<R: Runtime> {
-  fn codepush(&self) -> &Codepush<R>;
+    fn codepush(&self) -> &Codepush<R>;
 }
 
 impl<R: Runtime, T: Manager<R>> crate::CodepushExt<R> for T {
-  fn codepush(&self) -> &Codepush<R> {
-    self.state::<Codepush<R>>().inner()
-  }
+    fn codepush(&self) -> &Codepush<R> {
+        self.state::<Codepush<R>>().inner()
+    }
 }
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-  Builder::new("codepush")
-    .invoke_handler(tauri::generate_handler![commands::ping])
-    .setup(|app, api| {
-      #[cfg(mobile)]
-      let codepush = mobile::init(app, api)?;
-      #[cfg(desktop)]
-      let codepush = desktop::init(app, api)?;
-      app.manage(codepush);
-      Ok(())
-    })
-    .build()
+    Builder::new("codepush")
+        .invoke_handler(tauri::generate_handler![commands::ping])
+        .setup(|app, api| {
+            #[cfg(mobile)]
+            let codepush = mobile::init(app, api)?;
+            #[cfg(desktop)]
+            let codepush = desktop::init(app, api)?;
+            app.manage(codepush);
+            println!("Codepush plugin initialized");
+            Ok(())
+        })
+        .build()
 }
