@@ -1,9 +1,10 @@
 use serde::de::DeserializeOwned;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 
+use std::env;
 use std::sync::Mutex;
 use tauri::async_runtime::spawn;
-use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
 use tokio::time::{sleep, Duration};
 
 pub struct SetupState {
@@ -39,16 +40,22 @@ async fn setup<R: Runtime>(app: AppHandle<R>) -> Result<(), ()> {
     // let main_window = app.get_webview_window("main").unwrap();
     // main_window.set_visible_on_all_workspaces(false).unwrap();
     println!("Performing really heavy backend setup task...");
-    let initial_url = WebviewUrl::App("splashscreen.html".into());
+    let path = env::current_dir().unwrap().display().to_string();
+    let file_path = format!("file:///{}/../dist/splashscreen.html", path); // 절대 경로 사용
+    let initial_url = WebviewUrl::External(Url::parse(file_path.as_str()).unwrap());
     let splash_window = WebviewWindowBuilder::new(&app, "splashscreen", initial_url)
         .title("Splashscreen")
         .visible(true)
         .build()
         .unwrap();
+
+    let current_url = splash_window.url();
+    println!("Webview is currently looking at: {}", current_url.unwrap());
+
     splash_window.show().unwrap();
     println!("Splashscreen window created!");
     // NOTE: 코드 푸시 받는 거 구현해야함.
-    sleep(Duration::from_secs(3)).await;
+    sleep(Duration::from_secs(100000)).await;
     println!("Backend setup task completed!");
     set_complete(
         app.clone(),
