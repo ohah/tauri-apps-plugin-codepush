@@ -1,23 +1,27 @@
 use serde::de::DeserializeOwned;
+use serde::Deserialize;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 
 use std::env;
 use std::sync::Mutex;
 use tauri::async_runtime::spawn;
-use tauri::{Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Listener, Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
 use tokio::time::{sleep, Duration};
 
-pub struct SetupState {
+use crate::{models::*, Config};
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CodePushPluginState {
     frontend_task: bool,
     backend_task: bool,
+    config: Config,
 }
-
-use crate::models::*;
 
 #[tauri::command]
 async fn set_complete<R: Runtime>(
     app: AppHandle<R>,
-    state: State<'_, Mutex<SetupState>>,
+    state: State<'_, Mutex<CodePushPluginState>>,
     task: String,
 ) -> Result<(), ()> {
     let mut state_lock = state.lock().unwrap();
@@ -54,26 +58,38 @@ async fn setup<R: Runtime>(app: AppHandle<R>) -> Result<(), ()> {
 
     splash_window.show().unwrap();
     println!("Splashscreen window created!");
+
+    // NOTE:: 슬립 코드 제대로 동작 안됨.
+    sleep(Duration::from_secs(2000)).await;
+    let current_url: Result<Url, tauri::Error> = splash_window.url();
+    println!("Webview is currently looking at: {}", current_url.unwrap());
     // NOTE: 코드 푸시 받는 거 구현해야함.
-    sleep(Duration::from_secs(100000)).await;
+    // sleep(Duration::from_secs(100000)).await;
     println!("Backend setup task completed!");
     set_complete(
         app.clone(),
-        app.state::<Mutex<SetupState>>(),
+        app.state::<Mutex<CodePushPluginState>>(),
         "backend".to_string(),
     )
     .await?;
     Ok(())
 }
 
-pub fn init<R: Runtime, C: DeserializeOwned>(
+pub fn init<R: Runtime>(
     app: &AppHandle<R>,
-    _api: PluginApi<R, C>,
+    _api: PluginApi<R, Option<Config>>,
 ) -> crate::Result<Codepush<R>> {
-    app.manage(Mutex::new(SetupState {
+    let default_config = Config::default();
+    let config = _api.config().as_ref().unwrap_or(&default_config).clone();
+
+    println!("init codepush , {:?}", config.aws.bucket);
+
+    app.manage(Mutex::new(CodePushPluginState {
         frontend_task: true,
         backend_task: false,
+        config: config,
     }));
+
     spawn(setup(app.app_handle().clone()));
     Ok(Codepush(app.clone()))
 }
