@@ -36,5 +36,16 @@
     "resources": {
       "../resources/**/*": "resources/"
     }
+  },
+  "plugins": {
+    "codepush": {
+      "downloadUrl": "https://codepush-server.com/download",
+      "aws": {
+        "bucket": "codepush-bucket",
+        "region": "codepush-region",
+        "accessKey": "code",
+        "secretAccessKey": "push"
+      }
+    }
   }
 }
