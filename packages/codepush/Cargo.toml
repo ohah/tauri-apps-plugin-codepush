@@ -13,6 +13,7 @@ serde = { workspace = true }
 tauri = { workspace = true }
 thiserror = { workspace = true }
 tokio = "1.43.0"
+semver = "1.0.25"
 
 [build-dependencies]
 tauri-plugin = { version = "2.0.3", features = ["build"] }
