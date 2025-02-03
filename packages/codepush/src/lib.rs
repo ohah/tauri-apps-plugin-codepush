@@ -1,9 +1,7 @@
-use std::fmt::Debug;
-
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Manager, Runtime,
+    AppHandle, Manager, Runtime,
 };
 
 pub use models::*;
@@ -35,7 +33,32 @@ impl<R: Runtime, T: Manager<R>> crate::CodepushExt<R> for T {
     }
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Latest {
+    /// main build version
+    pub main_version: String,
+    /// code push version
+    pub current_version: String,
+    pub hash: String,
+    /// falback version
+    pub fallback_version: String,
+}
+
+impl Latest {
+    fn new<R: Runtime>(app: &AppHandle<R>) -> Self {
+        let version = app.config().version.as_ref();
+
+        Latest {
+            main_version: version.unwrap().to_string(),
+            hash: String::from("default_hash"),
+            current_version: version.unwrap().to_string(),
+            fallback_version: version.unwrap().to_string(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct S3Config {
     pub bucket: String,
@@ -44,31 +67,12 @@ pub struct S3Config {
     pub secret_access_key: String,
 }
 
-impl Default for S3Config {
-    fn default() -> Self {
-        S3Config {
-            bucket: String::from("default_bucket"),
-            region: String::from("default_region"),
-            access_key: String::from("default_access_key"),
-            secret_access_key: String::from("default_secret_key"),
-        }
-    }
-}
 // Define the plugin config
-#[derive(Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub aws: S3Config,
     pub download_url: String,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            aws: S3Config::default(), // S3Config도 Default를 구현해야 합니다.
-            download_url: String::from("default_url"),
-        }
-    }
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R, Option<Config>> {
