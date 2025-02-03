@@ -1,14 +1,13 @@
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use tauri::{plugin::PluginApi, AppHandle, Runtime};
 
 use std::env;
 use std::sync::Mutex;
 use tauri::async_runtime::spawn;
-use tauri::{Listener, Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
 use tokio::time::{sleep, Duration};
 
-use crate::{models::*, Config};
+use crate::{models::*, Config, Latest};
 
 #[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -28,6 +27,7 @@ async fn set_complete<R: Runtime>(
     match task.as_str() {
         "frontend" => state_lock.frontend_task = true,
         "backend" => state_lock.backend_task = true,
+        "config" => state_lock.config = Config::default(),
         _ => panic!("invalid task completed!"),
     }
     if state_lock.backend_task && state_lock.frontend_task {
@@ -59,10 +59,7 @@ async fn setup<R: Runtime>(app: AppHandle<R>) -> Result<(), ()> {
     splash_window.show().unwrap();
     println!("Splashscreen window created!");
 
-    // NOTE:: 슬립 코드 제대로 동작 안됨.
-    sleep(Duration::from_secs(2000)).await;
-    let current_url: Result<Url, tauri::Error> = splash_window.url();
-    println!("Webview is currently looking at: {}", current_url.unwrap());
+    sleep(Duration::from_secs(2)).await;
     // NOTE: 코드 푸시 받는 거 구현해야함.
     // sleep(Duration::from_secs(100000)).await;
     println!("Backend setup task completed!");
@@ -80,9 +77,10 @@ pub fn init<R: Runtime>(
     _api: PluginApi<R, Option<Config>>,
 ) -> crate::Result<Codepush<R>> {
     let default_config = Config::default();
+    let latest = Latest::new(app);
     let config = _api.config().as_ref().unwrap_or(&default_config).clone();
 
-    println!("init codepush , {:?}", config.aws.bucket);
+    println!("init codepush , {:?}", latest.current_version);
 
     app.manage(Mutex::new(CodePushPluginState {
         frontend_task: true,
