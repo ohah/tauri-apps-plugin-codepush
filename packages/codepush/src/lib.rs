@@ -33,7 +33,7 @@ impl<R: Runtime, T: Manager<R>> crate::CodepushExt<R> for T {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Latest {
     /// main build version
@@ -58,7 +58,7 @@ impl Latest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct S3Config {
     pub bucket: String,
@@ -68,7 +68,7 @@ pub struct S3Config {
 }
 
 // Define the plugin config
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub aws: S3Config,
