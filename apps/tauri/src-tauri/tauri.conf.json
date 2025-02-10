@@ -39,7 +39,7 @@
   },
   "plugins": {
     "codepush": {
-      "downloadUrl": "https://codepush-server.com/download",
+      "downloadUrl": "https://allthatnba.iwinv.net/codepush/dist.zip",
       "aws": {
         "bucket": "codepush-bucket",
         "region": "codepush-region",

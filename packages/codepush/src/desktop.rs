@@ -5,9 +5,10 @@ use std::env;
 use std::fs::File;
 use std::io::copy;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tauri::async_runtime::spawn;
 use tauri::{Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
+use tokio::sync::Mutex;
 use tokio::time::{sleep, Duration};
 
 use crate::{models::*, Config, Latest};
@@ -28,16 +29,10 @@ async fn download_file(url: &str, file_path: &Path) -> Result<(), reqwest::Error
     Ok(())
 }
 
-fn download(url: &str) {
-    let file_path = Path::new("downloaded_file.zip");
-
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
-        match download_file(url, file_path).await {
-            Ok(_) => println!("File downloaded successfully"),
-            Err(e) => eprintln!("Error downloading file: {}", e),
-        }
-    });
+async fn download(url: &str) -> Result<(), reqwest::Error> {
+    let file_path = Path::new("../../../downloaded_file.zip");
+    println!("Downloading file from file_path {:?}", file_path);
+    download_file(url, file_path).await
 }
 
 #[tauri::command]
@@ -46,7 +41,7 @@ async fn set_complete<R: Runtime>(
     state: State<'_, Arc<Mutex<CodePushPluginState>>>,
     task: String,
 ) -> Result<(), ()> {
-    let mut state_lock = state.lock().unwrap();
+    let mut state_lock = state.lock().await;
     match task.as_str() {
         "frontend" => state_lock.frontend_task = true,
         "backend" => state_lock.backend_task = true,
@@ -89,9 +84,9 @@ async fn setup<R: Runtime>(app: AppHandle<R>) -> Result<(), ()> {
 
     println!("state {:?}", state);
 
-    println!("config {:?}", state.lock().unwrap().config.download_url);
+    println!("config {:?}", state.lock().await.config.download_url);
 
-    download(state.lock().unwrap().config.download_url.as_str());
+    download(state.lock().await.config.download_url.as_str()).await;
     // sleep(Duration::from_secs(100000)).await;
     println!("Backend setup task completed!");
     set_complete(
@@ -107,6 +102,8 @@ pub fn init<R: Runtime>(
     app: &AppHandle<R>,
     _api: PluginApi<R, Option<Config>>,
 ) -> crate::Result<Codepush<R>> {
+    // let app_config = app.config().bundle.resources.clone();
+    // println!("app_config {:?}", app_config);
     let default_config = Config::default();
     let latest = Latest::new(app);
     let config = _api.config().as_ref().unwrap_or(&default_config).clone();
